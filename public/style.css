@@ -28,7 +28,8 @@ body{
 .wrapper-books{
     display: flex;
     flex-wrap: wrap;
-    gap:10px;
+    gap:30px;
+    justify-content: flex-start;
 
 }
 
@@ -47,4 +48,35 @@ body{
 .books-read:hover{
      cursor: pointer;
      border:2px black solid; 
+}
+
+.star:hover{
+     cursor: pointer;
+}
+
+.book-title{
+    text-align: center; 
+    font-size: 22px; 
+    font-weight: 500; 
+    font-family: "Verdana, Geneva, Helvetica, sans-serif";
+}
+
+.book-date{
+    text-align: right; 
+    font-size: 14px; 
+    font-weight: 500; 
+    padding-bottom: 0;
+    margin-bottom: 0;
+    font-family: "Verdana, Geneva, Helvetica, sans-serif";
+}
+.book-dets{
+    display: flex;
+    justify-content: space-between;
+    width:100%
+}
+
+.stars-book-dets{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 3px;
 }

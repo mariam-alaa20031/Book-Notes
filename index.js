@@ -91,9 +91,12 @@ app.post("/login", async (req,res)=>{
 })    
 
 app.post("/add", async (req,res)=>{
-    const isbn= req.body.isbn;
+    const {title, isbn, rating}= req.body;
+    
+    // check format isbn
     let isbnFormat=true;
     let books= await fetchBooks()
+
     for(let i=0;i<isbn.length;i++){
         if(isbn.charAt(i)<'0' || isbn.charAt(i)>'9'){
             isbnFormat=false;
@@ -102,9 +105,10 @@ app.post("/add", async (req,res)=>{
     if(isbn && !isbnFormat){
         res.render("books.ejs", {error:"ISBN digits must be 0-9!", user:currentUser})
     }
+    //check if isbn already present
     let alreadyAdded; 
     try{
-      alreadyAdded= await db.query("SELECT * FROM book WHERE user_id=$1 AND isbn=$2",[currentUserId,isbn])
+      alreadyAdded= await db.query("SELECT * FROM book WHERE user_id=$1 AND LOWER(title)=$2",[currentUserId,title])
      }catch(err){
         console.log("Error trying to check if book exists in user list or not!");
     }
@@ -113,7 +117,6 @@ app.post("/add", async (req,res)=>{
         res.render("books.ejs", {error:"Book already in list!", user:currentUser });
     }
     else{
-        console.log("Inside else");
         const url = 'https://covers.openlibrary.org/b/isbn/'+ isbn + '-M.jpg';
         let response;
         try{
@@ -126,13 +129,17 @@ app.post("/add", async (req,res)=>{
         if(response.data.toString('base64')==="R0lGODlhAQABAPAAAAAAAP///yH5BAUAAAAALAAAAAABAAEAAAICRAEAOw=="){
             res.render("books.ejs",{error:"ISBN doesn't exist!", books:books,user:currentUser})}
         else{    
-           await db.query("INSERT INTO book (user_id,isbn,cover,date) VALUES ($1,$2,$3,$4)",[currentUserId,isbn,response.data,new Date()])
+           await db.query("INSERT INTO book (user_id,isbn,title,cover,rating,date) VALUES ($1,$2,$3,$4,$5,$6)",[currentUserId,isbn,title,response.data,rating,new Date()])
            books= await fetchBooks()
            res.render("books.ejs", {success:"Added book successfully!",books:books, user:currentUser});
         }
     }
 })
 
+
+app.post("/view",async(req,res)=>{
+    
+})
 app.listen(port, ()=>{
     console.log("Server up and listening on port "+port + "!");
 })

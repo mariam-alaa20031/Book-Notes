@@ -9,34 +9,61 @@
 </head>
 <body>
 <%- include("partials/navbar.ejs") %>
-<div class="mt-3" style="width:30%; margin-left:35%">
-<form action="/add" method="post">
-    <% if (locals.error){%>
-        <div class="mb-3" style="text-align: center;">
-        <small class="mb-4"style="color:rgb(186, 24, 24)"><%=error%></small>
-      </div>
-     <%}%>
-     <%if (locals.success){%>
-        <div  style="text-align: center;"class="mb-3">
-        <small style="color:green"><%=success%></small>
-      </div>
-     <%}%>
-    <div class="mb-3">
-      <label for="isbn" class="form-label">Book ISBN</label>
-      <input type="text" required class="form-control" autofocus placeholder="10/13 digits" name="isbn">
-    </div>
-    <div style="display:flex; justify-content: flex-end;">
-    <button type="submit"  class="btn btn-sm btn-success">Submit</button>
-</div>
-  </form>
-</div>
+<%- include("addToList.ejs")%>
 
-  <div class="wrapper-books container mt-5 my-5">
+<div class="wrapper-books container mt-5 my-5">
     <% if(locals.books){%>
     <%  for(let i=0;i<books.length;i++){%>
         <form method="post" action="/view">
-            <input type="hidden" name="bookId" value='<%=books[i].isbn%>' >            
-            <img class="books-read" src="data:image/jpeg;base64,<%= books[i].cover %>" onclick="this.form.submit()" alt="Book Cover" />        </form>
+              <%const color1=books[i].rating>=1?"orange":"black";
+                const color2=books[i].rating>=2?"orange":"black";
+                const color3=books[i].rating>=3?"orange":"black";
+                const color4=books[i].rating>=4?"orange":"black";
+                const color5=books[i].rating>=5?"orange":"black"%>
+              <div class="stars-book-dets">
+                <div>
+              <svg  xmlns="http://www.w3.org/2000/svg" style="color:<%= color1 %>;" width="20" height="20" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+                <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+              </svg>
+              
+              <svg style="color: <%= color2 %>;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+                <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+              </svg>
+              <svg  style="color: <%= color3 %>;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+                <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+              </svg>
+              <svg style="color:<%= color4 %>;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+                <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+              </svg>
+              <svg  style="color: <%= color5 %>;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+                <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+              </svg>
+            </div>
+             </div>
+        
+            <input type="hidden" name="userBookId" value='<%=books[i].id%>' >            
+            <img style="height:270px;"class="books-read" src="data:image/jpeg;base64,<%= books[i].cover %>" onclick="this.form.submit()" alt="Book Cover" />   
+            <% let bookTitle = "";  
+   let book = books[i].title; 
+   let upperCase = false; 
+%>
+<% for (let j = 0; j < book.length; j++) { %> 
+   <% if (book.charAt(j) == " ") { %> 
+       <% upperCase = true; %> 
+       <% bookTitle += " "; %> 
+   <% } %> 
+   <% if (j == 0 || (upperCase && book.charAt(j) !== " ")) { %> 
+       <% bookTitle += book.charAt(j).toUpperCase(); 
+          upperCase = false; 
+       %> 
+   <% } else if (book.charAt(j) !== " ") { %> 
+       <% bookTitle += book.charAt(j).toLowerCase(); %> 
+   <% } %> 
+<% } %>
+
+<div class="mt-1 book-title"><%= bookTitle %></div>
+  
+          </form>
     <% }} %>
 </div>
 <%- include("partials/footer.ejs")%>
