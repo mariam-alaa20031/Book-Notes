@@ -1,4 +1,4 @@
-<nav class="container-fluid py-3 px-5 bg-body-tertiary border-bottom">
+<nav  class="match-head-foot container-fluid py-3 px-5 border-bottom">
     <div class="d-flex flex-wrap">
       <ul class="nav me-auto">
         <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2 active" aria-current="page">Home</a></li>
@@ -8,8 +8,10 @@
         <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">About</a></li>
       </ul>
       <ul class="nav">
+        <% if(!locals.user){%>
         <li class="nav-item"><a href="/login" class="btn btn-primary px-2">Login</a></li>
-        <li class="nav-item"><a href="/logout" class="nav-link link-body-emphasis px-2">Logout</a></li>
+        <%}%>
+        <li class="nav-item"><a href='<%=locals.user?"/logout":"/"%>' class="nav-link link-body-emphasis px-2"><%=locals.user?"Logout":"Register"%></a></li>
       </ul>
     </div>
   </nav>
