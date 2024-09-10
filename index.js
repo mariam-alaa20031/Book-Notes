@@ -6,6 +6,8 @@ import dotenv from 'dotenv'
 
 const app = express()
 const port= 3000
+let currentUserId;
+
 app.use(express.static("public"))
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(bodyParser.json())
@@ -32,6 +34,11 @@ app.get("/", async (req,res)=>{
 
 app.get("/login", (req,res)=>{
      res.render("index.ejs",{login:"login"})
+})
+
+app.get("/logout",(req,res)=>{
+    currentUserId=undefined;
+    res.redirect("/")
 })
 
 app.post("/signup", async (req,res)=>{
