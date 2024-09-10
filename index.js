@@ -30,10 +30,38 @@ app.get("/", async (req,res)=>{
     res.render("index.ejs", {img: response.data.toString('base64') });
 })
 
+app.get("/login", (req,res)=>{
+     res.render("index.ejs",{login:"login"})
+})
+
 app.post("/signup", async (req,res)=>{
     const {username, password}= req.body
-    await d
-})
+    try{
+    const response= await db.query("SELECT * FROM users WHERE username=$1",[username])
+    if(response.rows.length==0){
+    await db.query("INSERT INTO users (username, password) VALUES ($1,$2)",[username,password])
+    const response=await db.query("SELECT * FROM users WHERE username=$1",[username])
+    const success= "Successfully registered!"
+    res.render("index.ejs",{user:response.rows, success:success, login:"login"})}
+    else{
+        const error="Username already exists!"
+        res.render("index.ejs", {error:error})
+    }
+}
+    catch(err){
+        console.log(err);
+    }})
+
+app.post("/login", async (req,res)=>{
+     const {username, password}=req.body
+     const exists=await db.query("SELECT * FROM users WHERE username=$1 AND password=$2",[username,password])
+     if(exists.rowCount>0){
+        res.render("new.ejs",{user:exists.rows[0]})
+     }
+     else{
+        res.render("index.ejs", {login:"login", error:"Wrong username or password!"})
+     }
+})    
 
 app.listen(port, ()=>{
     console.log("Server up and listening on port "+port + "!");
