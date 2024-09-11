@@ -9,12 +9,14 @@
 </head>
 <body>
 <%- include("partials/navbar.ejs") %>
+<!-- <div class="section-header wrapper-all mt-5 container-fluid"> -->
+  <div class="section-header"> 
 <%- include("addToList.ejs")%>
 
-<div class="wrapper-books container mt-5 my-5">
+<div class=" wrapper-books container mt-5 my-5">
     <% if(locals.books){%>
     <%  for(let i=0;i<books.length;i++){%>
-        <form method="post" action="/view">
+        <form method="post" action="/view"  >
               <%const color1=books[i].rating>=1?"orange":"black";
                 const color2=books[i].rating>=2?"orange":"black";
                 const color3=books[i].rating>=3?"orange":"black";
@@ -66,4 +68,6 @@
           </form>
     <% }} %>
 </div>
+</div>
+
 <%- include("partials/footer.ejs")%>
