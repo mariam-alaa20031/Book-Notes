@@ -1,0 +1,29 @@
+<script>
+    const stars= document.getElementsByClassName("star")
+    console.log(stars);
+    for(let i=0;i<stars.length;i++){
+      stars[i].addEventListener('click',()=>{
+        let rating;
+        switch(stars[i].id){
+          case "star1": rating=1;
+                        break;
+          case "star2": rating=2;
+                        break; 
+          case "star3": rating=3;
+                        break;
+          case "star4": rating=4;
+                        break;  
+          case "star5": rating=5;
+                        break;
+          default: rating=0;                                                                      
+        }
+      for (let j = 0; j < rating; j++) {
+        stars[j].style.color = "orange"; 
+      }
+      for (let j = rating; j < stars.length; j++) {
+        stars[j].style.color = "black";  
+           }
+      document.getElementById("book-rate").setAttribute("value",`${rating}`)
+      })
+    }
+  </script>

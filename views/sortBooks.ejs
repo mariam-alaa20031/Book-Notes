@@ -1,0 +1,9 @@
+<form class="container-fluid px-5" action="/login/sort" method="post">
+    <label style="margin-right: 2px; font-size: 18px;">Sort by: </label>
+    <select class="rounded-1" id="sortBooks" onchange="this.form.submit()" name="sortOption">
+            <option value="none" <%= locals.sortOption === 'none' ? 'selected' : '' %>>None</option>
+            <option value="title" <%= locals.sortOption === 'title' ? 'selected' : '' %>>Name</option>
+            <option value="date" <%= locals.sortOption === 'date' ? 'selected' : '' %>>Latest</option>
+            <option value="rating" <%= locals.sortOption === 'rating'? 'selected' : '' %>>Rating</option>
+    </select>
+  </form>

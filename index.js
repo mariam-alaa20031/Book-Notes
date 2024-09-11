@@ -8,6 +8,7 @@ const app = express()
 const port= 3000
 let currentUserId;
 let currentUser;
+let books;
 
 app.use(express.static("public"))
 app.use(bodyParser.urlencoded({extended:true}))
@@ -26,12 +27,24 @@ const db= new pg.Client({
 db.connect();
 
 
-async function fetchBooks(){
+
+
+async function fetchBooks(sortOption){
     try{
-    const response= await db.query("SELECT * FROM book WHERE user_id=$1",[currentUserId])
+     let query="";   
+     switch(sortOption){
+        case "title":  query="SELECT * FROM book WHERE user_id=$1 ORDER BY title ASC";
+                       break;
+        case "date" :  query="SELECT * FROM book WHERE user_id=$1 ORDER BY date DESC";
+                       break;
+        case "rating": query="SELECT * FROM book WHERE user_id=$1 ORDER BY rating DESC";
+                       break;                            
+        default:       query="SELECT * FROM book WHERE user_id=$1"             
+                      
+     }
+    const response= await db.query(query,[currentUserId])
     for(let i=0;i<response.rows.length;i++){
         response.rows[i].cover=response.rows[i].cover.toString('base64');
-        console.log(response.rows[i].cover);
      }
     return response.rows;
 }
@@ -40,13 +53,40 @@ async function fetchBooks(){
     }
 }
 
+async function fetchBook(id) {
+    try {
+      const response = await db.query('SELECT * FROM book WHERE id=$1', [id]);
+      if (response.rowCount > 0) {
+        response.rows[0].cover = response.rows[0].cover.toString('base64');
+        console.log(response.rows[0]);
+        return response.rows[0];
+      } else {
+        console.log('No book found with this ID');
+        return null;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  
+
 app.get("/", async (req,res)=>{
     res.render("index.ejs");
 })
 
-app.get("/login", (req,res)=>{
-     res.render("index.ejs",{login:"login"})
-})
+
+
+app.get("/login",  async (req,res)=>{
+    const sortOption =req.query.sort?req.query.sort:"none"
+    if(currentUserId){
+          books=await fetchBooks(sortOption);
+          if (sortOption === "date") {
+            books.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+          res.render("books.ejs",{books:books, user:currentUser, sortOption: sortOption})
+    }
+    else{
+     res.render("index.ejs",{login:"login"})}})
 
 app.get("/logout",(req,res)=>{
     currentUserId=undefined;
@@ -79,7 +119,7 @@ app.post("/login", async (req,res)=>{
      if(user.rowCount>0){
         currentUserId=user.rows[0].id
         currentUser=user.rows[0];
-        const books= await fetchBooks()
+        books= await fetchBooks("none");
         res.render("books.ejs",{user:currentUser, books:books})
      }
      else{
@@ -95,7 +135,7 @@ app.post("/add", async (req,res)=>{
     
     // check format isbn
     let isbnFormat=true;
-    let books= await fetchBooks()
+    let books= await fetchBooks("none")
 
     for(let i=0;i<isbn.length;i++){
         if(isbn.charAt(i)<'0' || isbn.charAt(i)>'9'){
@@ -130,16 +170,36 @@ app.post("/add", async (req,res)=>{
             res.render("books.ejs",{error:"ISBN doesn't exist!", books:books,user:currentUser})}
         else{    
            await db.query("INSERT INTO book (user_id,isbn,title,cover,rating,date) VALUES ($1,$2,$3,$4,$5,$6)",[currentUserId,isbn,title,response.data,rating,new Date()])
-           books= await fetchBooks()
+           books= await fetchBooks("none")
            res.render("books.ejs", {success:"Added book successfully!",books:books, user:currentUser});
         }
     }
 })
 
+app.post("/login/sort",async (req,res)=>{
+    let option;
+    if(req.body.sortOption){
+        option=req.body.sortOption;
+        console.log(option);
+        res.redirect(`/login?sort=${option}`)
+    }
+    else{
+        res.redirect('/login')
+    }
+   
 
-app.post("/view",async(req,res)=>{
-    
 })
+
+app.post("/login/book", async(req, res) => {
+    const book= await fetchBook(req.body.userBookId)
+    console.log(req.body.userBookId);
+    console.log(book);
+    res.render("book.ejs",{book:book,user:currentUser})
+   
+    
+});
+
+
 app.listen(port, ()=>{
     console.log("Server up and listening on port "+port + "!");
 })
