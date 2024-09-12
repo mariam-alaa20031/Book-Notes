@@ -1,0 +1,24 @@
+<div class="col-md-10 mx-auto col-lg-5" style="margin-top: auto;">
+    <form action='/login/book/add-review' method="post" class=" p-md-5 rounded-3 " style="border:4px solid rgba(12, 10, 10, 0.747); background-color: #f6f6ee;"  >  
+      <% if (locals.error){%>
+        <div class="mb-3" style="text-align: center;">
+        <small class="mb-4"style="color:rgb(186, 24, 24)"><%=error%></small>
+      </div>
+     <%}%>
+     <%if (locals.success){%>
+        <div  style="text-align: center;"class="mb-3">
+        <small style="color:green"><%=success%></small>
+      </div>
+     <%}%>
+     <input type="hidden" value="<%=locals.book.id%>" name="userBookId">
+      <div class="form-floating mb-3">
+        <div class="mb-3">
+            <label for="title" class="form-label">Note</label>
+            <input type="text" required class="form-control" autofocus placeholder="Ex: page 200 contains the plot twist" name="review">
+          </div>
+      </div>
+      <div style="display:flex; justify-content: flex-end;">
+      <button type="submit"  class="btn btn-sm btn-success">Submit</button>
+    </div>
+   </form>
+  </div>

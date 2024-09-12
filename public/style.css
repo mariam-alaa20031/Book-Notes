@@ -1,4 +1,13 @@
+body{
+    display:flex;
+    flex-direction: column;
+    margin:0;
+    min-height:100vh;   
+}
 
+.push-to-bottom{
+    margin-top:auto
+}
 .link-button {
     background: none;
     border: none;
@@ -7,6 +16,7 @@
     cursor: pointer;
     font-size: 16px;
 }
+
 .link-button:focus {
     outline: none;
 }
@@ -78,6 +88,27 @@
     margin-bottom: 3px;
 }
 
-/* .wrapper-all{
-    display: flex;
-} */
+#book-list{
+    list-style:inside;
+    font-family:"Cambria, Cochin, Georgia, Times, 'Times New Roman', serif";
+    /* padding-left: 2px; */
+    padding-left: 0;
+}
+
+.review-wrapper{
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-columns: 1fr;
+    grid-auto-rows:  1fr;
+    gap:50px;
+    justify-items: center; 
+}
+
+.review-item{
+    border: #697565 3px solid; 
+    padding: 20px;
+    text-align: center;
+    border-radius: 4px;
+    color: black;
+    background-color: white}

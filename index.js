@@ -6,11 +6,7 @@ import dotenv from 'dotenv'
 
 const app = express()
 const port= 3000
-let currentUserId;
-let currentUser;
-let books;
-
-app.use(express.static("public"))
+app.use(express.static('public'));
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(bodyParser.json())
 dotenv.config();
@@ -23,11 +19,11 @@ const db= new pg.Client({
     port: 5432
 })
 
-
 db.connect();
 
-
-
+let currentUserId;
+let currentUser;
+let books;
 
 async function fetchBooks(sortOption){
     try{
@@ -58,35 +54,45 @@ async function fetchBook(id) {
       const response = await db.query('SELECT * FROM book WHERE id=$1', [id]);
       if (response.rowCount > 0) {
         response.rows[0].cover = response.rows[0].cover.toString('base64');
-        console.log(response.rows[0]);
         return response.rows[0];
       } else {
-        console.log('No book found with this ID');
         return null;
       }
     } catch (err) {
-      console.log(err);
+      console.log("Error occured while fetching book!");
     }
   }
-  
+
+async function checkBookAdded(title){
+    try{
+        const bookAddedBefore= await db.query("SELECT * FROM book WHERE user_id=$1 AND LOWER(title)=$2",[currentUserId,title])
+        return bookAddedBefore.rowCount>0?true:false;
+       }catch(err){
+          console.log("Error trying to check if book exists in user list or not!");
+      }
+}  
+
+async function fetchReviews(bookUserId){
+    try{
+        const reviews= await db.query("SELECT * FROM reviews WHERE user_id=$1 AND book_id=$2",[currentUserId,bookUserId])
+        return reviews.rowCount>0?reviews.rows:null;
+       }catch(err){
+          console.log("Error trying to check if book exists in user list or not!");
+      }
+}  
 
 app.get("/", async (req,res)=>{
     res.render("index.ejs");
 })
 
-
-
 app.get("/login",  async (req,res)=>{
     const sortOption =req.query.sort?req.query.sort:"none"
-    if(currentUserId){
-          books=await fetchBooks(sortOption);
-          if (sortOption === "date") {
+    books= currentUserId? await fetchBooks(sortOption):books;
+    if (sortOption === "date") {
             books.sort((a, b) => new Date(b.date) - new Date(a.date));
         }
-          res.render("books.ejs",{books:books, user:currentUser, sortOption: sortOption})
-    }
-    else{
-     res.render("index.ejs",{login:"login"})}})
+    currentUserId? res.render("books.ejs",{books:books, user:currentUser, sortOption: sortOption}):
+    res.render("index.ejs",{login:"login"})})
 
 app.get("/logout",(req,res)=>{
     currentUserId=undefined;
@@ -98,8 +104,8 @@ app.post("/signup", async (req,res)=>{
     try{
     const response= await db.query("SELECT * FROM users WHERE username=$1",[username])
     if(response.rows.length==0){
-    await db.query("INSERT INTO users (username, password) VALUES ($1,$2)",[username,password])
-    const user=await db.query("SELECT * FROM users WHERE username=$1",[username])
+    const user= await db.query("INSERT INTO users (username, password) VALUES ($1,$2) RETURNING *",[username,password])
+    console.log(user.rows[0]);
     const success= "Successfully registered!"
     res.render("index.ejs",{user:user.rows[0], success:success, login:"login"})}
     else{
@@ -130,30 +136,17 @@ app.post("/login", async (req,res)=>{
      }
 })    
 
+
 app.post("/add", async (req,res)=>{
     const {title, isbn, rating}= req.body;
-    
-    // check format isbn
-    let isbnFormat=true;
-    let books= await fetchBooks("none")
-
-    for(let i=0;i<isbn.length;i++){
-        if(isbn.charAt(i)<'0' || isbn.charAt(i)>'9'){
-            isbnFormat=false;
-        }
-    }
+    let isbnFormat=isbn.length===9||isbn.length===13?true:false;
+    books=await fetchBooks("none")
     if(isbn && !isbnFormat){
-        res.render("books.ejs", {error:"ISBN digits must be 0-9!", user:currentUser})
+        return res.render("books.ejs", {error:"Only 10/13 ISBN digits are accepted!", user:currentUser})
     }
     //check if isbn already present
-    let alreadyAdded; 
-    try{
-      alreadyAdded= await db.query("SELECT * FROM book WHERE user_id=$1 AND LOWER(title)=$2",[currentUserId,title])
-     }catch(err){
-        console.log("Error trying to check if book exists in user list or not!");
-    }
-
-    if(alreadyAdded && alreadyAdded.rowCount>0){
+    let alreadyExists= await checkBookAdded(title)
+    if(alreadyExists){
         res.render("books.ejs", {error:"Book already in list!", user:currentUser });
     }
     else{
@@ -164,7 +157,7 @@ app.post("/add", async (req,res)=>{
             responseType: 'arraybuffer',
         });}
         catch(err){
-            res.render("books.ejs", {error:"ISBN doesn't exist!", user:currentUser , books:books});}
+            res.render("books.ejs", {error:"Error while trying to fetch book!", user:currentUser , books:books});}
        
         if(response.data.toString('base64')==="R0lGODlhAQABAPAAAAAAAP///yH5BAUAAAAALAAAAAABAAEAAAICRAEAOw=="){
             res.render("books.ejs",{error:"ISBN doesn't exist!", books:books,user:currentUser})}
@@ -176,29 +169,39 @@ app.post("/add", async (req,res)=>{
     }
 })
 
-app.post("/login/sort",async (req,res)=>{
-    let option;
-    if(req.body.sortOption){
-        option=req.body.sortOption;
-        console.log(option);
-        res.redirect(`/login?sort=${option}`)
-    }
-    else{
-        res.redirect('/login')
-    }
-   
 
+app.post("/login/sort",(req,res)=>{
+    let option=req.body.sortOption;
+    res.redirect(option?`/login?sort=${option}`:'/login')
 })
 
 app.post("/login/book", async(req, res) => {
     const book= await fetchBook(req.body.userBookId)
-    console.log(req.body.userBookId);
-    console.log(book);
-    res.render("book.ejs",{book:book,user:currentUser})
-   
-    
+    let reviews = await fetchReviews(req.body.userBookId)
+    res.render("book.ejs",{book:book,user:currentUser,reviews:reviews===null?"":reviews})    
 });
 
+app.post("/login/book/add-review", async(req,res)=>{
+   const{userBookId, review}= req.body
+   console.log(req.body);
+   const book= await fetchBook(userBookId)
+   console.log(book);
+   let reviews;
+   if(review){
+      try{
+          await db.query("INSERT INTO reviews (user_id,book_id,review) VALUES ($1,$2,$3)",[currentUserId,userBookId,review])
+          reviews= await fetchReviews(userBookId)
+          res.render("book.ejs",{book:book, user:currentUser,reviews:reviews===null?"":reviews, success:"Note added successfully!"})    
+
+        }
+      catch(err){
+           let reviews = await fetchReviews(userBookId)
+           res.render("book.ejs",{book:book,user:currentUser,reviews:reviews===null?"":reviews, error:"Note already exists!"})    
+
+      } 
+   }
+
+})
 
 app.listen(port, ()=>{
     console.log("Server up and listening on port "+port + "!");

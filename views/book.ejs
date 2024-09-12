@@ -4,11 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= locals.book? book.title : locals.user?user.username: "YourBooks" %></title>
+    <link href="/style.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="style.css">
   </head>
 <%- include("partials/navbar.ejs") %>
-
-<%- include("partials/footer.ejs") %>
+<div class="section-header container-fluid" style="margin-top: 0; margin-bottom: 0; flex:1; ">
+<div class="container-fluid px-5 mt-3 py-5">
+  <div class="wrapper-books">
+   <img style="height:270px; width:175px;" src="data:image/jpeg;base64,<%= locals.book? book.cover:"" %>" alt="Book Cover">
+   
+   <% let bookTitle = ""; %>
+   <% let oldTitle = locals.book? book.title.split(" "):""; %>
+   <% for (let j = 0; j < oldTitle.length; j++) { %>
+    <%    bookTitle+= oldTitle[j].charAt(0).toUpperCase()+ oldTitle[j].slice(1) %>
+    <%    bookTitle+= j==oldTitle.length-1?"":" " %>
+    <% } %>
+   <div class="mx-4" style="display: flex; flex-direction: column; height: 270px; justify-content: flex-end;">
+  <h2 style="color:#3C3D37;font-family: Verdana, Geneva, Tahoma, sans-serif"><%= bookTitle %></h2>
+   <% 
+   let color1 = book.rating >= 1 ? "orange" : "black";
+   let color2 = book.rating >= 2 ? "orange" : "black";
+   let color3 = book.rating >= 3 ? "orange" : "black";
+   let color4 = book.rating >= 4 ? "orange" : "black";
+   let color5 = book.rating >= 5 ? "orange" : "black";
+   %>
+  <div class="stars-book-dets mb-4" style="justify-content: flex-start; margin-bottom: auto;">
+    <div>
+        <svg xmlns="http://www.w3.org/2000/svg" style="color:<%= color1 %>;" width="20" height="20" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+            <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" style="color: <%= color2 %>;" width="20" height="20" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+            <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" style="color: <%= color3 %>;" width="20" height="20" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+            <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" style="color: <%= color4 %>;" width="20" height="20" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+            <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" style="color: <%= color5 %>;" width="20" height="20" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+            <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>
+        </svg>
+    </div>
+</div>
+   <ul id="book-list">
+    <li>Title: <%= bookTitle %></li>
+    <li>Isbn (<%= book.isbn.length %> digits): <%= book.isbn %></li>
+    <li>Date added: <%=" " +book.date.getDate() %>/<%= book.date.getMonth() + 1 %>/<%= book.date.getFullYear() %></li>
+</ul>
+  </div>  
+   <%- include("addReview.ejs")%>
+  </div>
+</div>
+<hr>
+    <div class="container-fluid px-5 review-wrapper py-5">
+         <%if(locals.reviews===""){%>
+         <h6 style="color:rgb(186, 24, 24)">*No current notes to fetch!*</h6>
+         <%} else{%>
+              <%for(let i=0;i<reviews.length;i++){%>
+                <div class="review-item container" >
+                <p style="text-align: center; font-size: small;">Note <%= " " + (i+1)%></p>
+                <hr>
+                <h6><%= reviews[i].review %></h6>
+                <hr>
+               </div>
+          <%}}%>
+    </div>
+</div>
+   <%- include("partials/footer.ejs") %>
 </body>
 </html>
