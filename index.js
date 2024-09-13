@@ -24,6 +24,8 @@ db.connect();
 let currentUserId;
 let currentUser;
 let books;
+let book;
+let userBookId;
 
 async function fetchBooks(sortOption){
     try{
@@ -62,6 +64,30 @@ async function fetchBook(id) {
       console.log("Error occured while fetching book!");
     }
   }
+
+async function deleteReview(user_id,book_id,review){
+    try{
+        const response= await db.query("SELECT FROM reviews WHERE book_id=$1 AND user_id=$2 AND review=$3",[book_id,user_id,review])
+        console.log(user_id+ " "+book_id + " "+review);
+        await db.query("DELETE FROM reviews WHERE book_id=$1 AND user_id=$2 AND review=$3",[book_id,user_id,review])
+        console.log(response.rows[0]);
+        await db.query("DELETE FROM reviews WHERE book_id=$1 AND user_id=$2 AND review=$3",[book_id,user_id,review])
+        return {"success":"Deleted note successfully!"}
+    }
+    catch(err){
+        return {"error":"Error occured while deleting!"}
+    }
+}  
+
+async function updateReview(user_id,book_id,review, newReview){
+    try{
+        await db.query("UPDATE reviews SET review=$1 WHERE book_id=$2 AND user_id=$3 AND review=$4",[newReview,book_id,user_id,review])
+        return {"success":"Updated note successfully!"}
+    }
+    catch(err){
+        return {"error":"Error occured while deleting!"}
+    }
+}  
 
 async function checkBookAdded(title){
     try{
@@ -175,8 +201,10 @@ app.post("/login/sort",(req,res)=>{
     res.redirect(option?`/login?sort=${option}`:'/login')
 })
 
+
 app.post("/login/book", async(req, res) => {
-    const book= await fetchBook(req.body.userBookId)
+    userBookId=req.body.userBookId
+    book= await fetchBook(req.body.userBookId)
     let reviews = await fetchReviews(req.body.userBookId)
     res.render("book.ejs",{book:book,user:currentUser,reviews:reviews===null?"":reviews})    
 });
@@ -185,7 +213,6 @@ app.post("/login/book/add-review", async(req,res)=>{
    const{userBookId, review}= req.body
    console.log(req.body);
    const book= await fetchBook(userBookId)
-   console.log(book);
    let reviews;
    if(review){
       try{
@@ -201,6 +228,15 @@ app.post("/login/book/add-review", async(req,res)=>{
       } 
    }
 
+})
+
+app.post("/login/book/update-reviews",async (req,res)=>{
+      const {book_id,user_id,review,updatedReview,type}= req.body
+      console.log(req.body);
+      console.log("book: "+book_id+ " user:"+user_id+ " review: "+review+ " updated: "+updatedReview+ " type"+type);
+      const responseState= type==='delete'? await deleteReview(user_id,book_id,review): await updateReview(user_id,book_id,review,updatedReview)
+      let reviews = await fetchReviews(userBookId)
+      res.render("book.ejs",{book:book,user:currentUser,reviews:reviews===null?"":reviews,state:responseState})  
 })
 
 app.listen(port, ()=>{

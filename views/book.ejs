@@ -9,7 +9,7 @@
   </head>
 <%- include("partials/navbar.ejs") %>
 <div class="section-header container-fluid" style="margin-top: 0; margin-bottom: 0; flex:1; ">
-<div class="container-fluid px-5 mt-3 py-5">
+<div class="container-fluid px-5 mt-3 py-5" style="margin-bottom: 0; padding-bottom: 20px;">
   <div class="wrapper-books">
    <img style="height:270px; width:175px;" src="data:image/jpeg;base64,<%= locals.book? book.cover:"" %>" alt="Book Cover">
    
@@ -19,7 +19,7 @@
     <%    bookTitle+= oldTitle[j].charAt(0).toUpperCase()+ oldTitle[j].slice(1) %>
     <%    bookTitle+= j==oldTitle.length-1?"":" " %>
     <% } %>
-   <div class="mx-4" style="display: flex; flex-direction: column; height: 270px; justify-content: flex-end;">
+ <div id="book-details" class="mx-4" style="display: flex; flex-direction: column; height: 270px; justify-content: flex-end;">
   <h2 style="color:#3C3D37;font-family: Verdana, Geneva, Tahoma, sans-serif"><%= bookTitle %></h2>
    <% 
    let color1 = book.rating >= 1 ? "orange" : "black";
@@ -54,23 +54,81 @@
 </ul>
   </div>  
    <%- include("addReview.ejs")%>
-  </div>
 </div>
-<hr>
-    <div class="container-fluid px-5 review-wrapper py-5">
-         <%if(locals.reviews===""){%>
-         <h6 style="color:rgb(186, 24, 24)">*No current notes to fetch!*</h6>
+</div>
+<%if(locals.state){%>
+    <div class="px-5 container-fluid">
+<h6 style="color: <%= locals.state.error ? 'rgb(186, 24, 24)' : 'green' %>"><%=locals.state.error?locals.state.error:locals.state.success%></h6>
+  </div>
+  <%}%>
+  <div class="container-fluid px-5"> 
+  <hr>
+</div> 
+  <div class="container-fluid px-5 review-wrapper py-4">
+         <%if(locals.reviews===""){%>   
+         <h6  style="color:rgb(186, 24, 24)">*No current notes to fetch!*</h6>
          <%} else{%>
               <%for(let i=0;i<reviews.length;i++){%>
-                <div class="review-item container" >
+                <form class="review-item container" method="post" action="/login/book/update-reviews" >
+                <div style="display: flex; justify-content: flex-end; margin-top: 0; margin-bottom: 5px;">  
+                 <svg  class="review-actions" style="color:rgb(71, 100, 101);  padding-top:5px;" onclick="editForm(this.closest('form'))" xmlns="http://www.w3.org/2000/svg" width="24" height="24" style="padding-top:5px" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
+                      </svg>   
+                <svg  class="review-actions" xmlns="http://www.w3.org/2000/svg" onclick="editFormDelete(this.closest('form'))" style="color:red; margin-bottom:0;" width="30" height="30" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                  </svg>    </div>  
                 <p style="text-align: center; font-size: small;">Note <%= " " + (i+1)%></p>
                 <hr>
-                <h6><%= reviews[i].review %></h6>
+                <h6 class="review-text" onchange="addValue(this.form)"><%= reviews[i].review %></h6>
                 <hr>
-               </div>
+                <input type="hidden" name="book_id" value="<%= reviews[i].book_id%>">
+                <input type="hidden" name="user_id" value="<%= reviews[i].user_id%>">
+                <input type="hidden" name="review" value="<%= reviews[i].review%>">
+                <input class="new-review" type="hidden" name="updatedReview">
+                <input class="type" name="type" type="hidden" value="">
+                <div class="button-container"><button type="submit" onclick="submitFormEdit(this.closest('form'))" class="edit btn btn-dark btn-sm" style="display: none; margin-right: 2px;" >confirm</button>
+                    <button  type="submit" onclick="submitFormDelete(this.closest('form'))" class="delete btn btn-danger btn-sm" style="display: none;" >delete</button>
+                    </div>    
+            </form>
           <%}}%>
+    </div>
     </div>
 </div>
    <%- include("partials/footer.ejs") %>
+   <script>
+
+function editForm(form) {
+    const button = form.querySelector(".edit");
+    button.style.display = "block";
+    const reviewText = form.querySelector('.review-text');
+    reviewText.contentEditable = 'true';
+    reviewText.focus();
+}
+
+function editFormDelete(form) {
+    const button = form.querySelector(".delete");
+    button.style.display = "block";
+}
+
+function addValue(form, action) {
+    const typeOf = form.querySelector('.type');
+    const reviewText = form.querySelector('.review-text');
+    const reviewInput = form.querySelector('.new-review');
+    typeOf.value = action;
+    reviewInput.value = reviewText.textContent;
+}
+
+function submitFormEdit(form) {
+    addValue(form, "edit");
+    form.submit();
+}
+
+function submitFormDelete(form) {
+    addValue(form, "delete");
+    form.submit();
+}
+
+
+</script>
 </body>
 </html>
